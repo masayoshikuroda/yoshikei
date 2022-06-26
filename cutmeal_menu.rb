@@ -4,14 +4,15 @@ require 'nokogiri'
 require 'open-uri'
 
 BASE_URL = 'https://www2.yoshikei-dvlp.co.jp/webodr/apl/10/101508_D.aspx'
-DAYS = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"]
+DAYS     = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"]
+DAYS_JA  = ["日",     "月",     "火",      "水",        "木",       "金",     "土"      ]
 
-def beginning_of_week(day)
-  return day - day.wday + 1
+def beginning_of_week(date)
+  return date - date.wday + 1
 end
 
-def get_url(day)
-  bday = beginning_of_week(day)
+def get_url(date)
+  bday = beginning_of_week(date)
   wk = bday.strftime("%Y%m%d")
   dy = bday.strftime("%Y%m%d")
   kb = '01'
@@ -37,17 +38,29 @@ def get_menu_item(section)
   return menu_item
 end
 
-def to_week(day)
-  return DAYS[day.wday]
+def to_week(date)
+  return DAYS[date.wday]
 end
 
-day = Date.today
+date = Date.today
 if ARGV.length > 0 then
-  day = DateTime.parse(ARGV[0])
+  date = DateTime.parse(ARGV[0])
 end
-url = get_url(day)
-doc = Nokogiri::HTML(open(url), nil, "shiftjis")
-week = to_week(day)
+url = get_url(date)
+doc = Nokogiri::HTML(URI.open(url), nil, "shiftjis")
+week = to_week(date)
 section = get_section(doc, week)
-item = get_menu_item(section)
+item = if section.nil? then
+  {
+    "date-at-num"  => "#{date.month}/#{date.day}",
+    "date-at-week" => "(#{DAYS_JA[date.wday]})",
+    "title-name"   => "",
+    "kind"         => "カットミール",
+    "date"         => "#{date.month}/#{date.day}(#{DAYS_JA[date.wday]})",
+    "info"         => "#{date.month}/#{date.day}(#{DAYS_JA[date.wday]})のお届けはありません。",
+    "name"         => ""
+  }
+else
+  get_menu_item(section)
+end
 puts item.to_json()
