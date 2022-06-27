@@ -2,10 +2,12 @@
 
 ヨシケイのメニューをOnlineで取得します。
 
-# Required library
+# 事前準備
 
 ruby
 - selenium-webdriver
+
+# 利用例
 
 ## カットミールのメニュー
 
