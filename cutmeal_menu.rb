@@ -58,9 +58,25 @@ item = if section.nil? then
     "kind"         => "カットミール",
     "date"         => "#{date.month}/#{date.day}(#{DAYS_JA[date.wday]})",
     "info"         => "#{date.month}/#{date.day}(#{DAYS_JA[date.wday]})のお届けはありません。",
-    "name"         => ""
+    "name"         => "",
+    "message"      => "のヨシケイのメニューは、#{}"
   }
 else
   get_menu_item(section)
 end
+
+prefix = if date == Date.today then
+  "本日の"
+else
+  "#{date.month}月#{date.day}日の"
+end
+
+message = if item["name"].empty? then
+  "お届けはありません。"
+else
+  "ヨシケイのメニューは、#{item['name']}です。"
+end
+item["message"] = prefix + message
+
 puts item.to_json()
+
